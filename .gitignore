@@ -1,0 +1,5 @@
+catboost_info/catboost_training.json
+__pycache__/educate_LSTM.cpython-311.pyc
+catboost_info/learn_error.tsv
+catboost_info/time_left.tsv
+catboost_info/learn/events.out.tfevents
