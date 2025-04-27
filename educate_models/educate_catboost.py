@@ -1,21 +1,15 @@
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-from catboost import CatBoostClassifier
 from sklearn.metrics import accuracy_score, classification_report
+from catboost import CatBoostClassifier
+import optuna
 
-df = pd.read_csv('dataset/water_quality_dataset_big.csv')
+# Загрузка данных
+df = pd.read_csv('datasets/water_quality_dataset_big.csv')
 
-def label_quality(turbidity):
-    if turbidity < 5:
-        return 0
-    elif turbidity <= 15:
-        return 1
-    else:
-        return 2
-
-df['quality_label'] = df['turbidity'].apply(label_quality)
+# Маппинг класса качества
+quality_mapping = {'good': 0, 'medium': 1, 'bad': 2}
+df['quality_label'] = df['quality_class'].map(quality_mapping)
 
 features = ['temp_water', 'temp_air', 'precipitation', 'water_level', 'pH', 'oxygen', 'nitrates', 'ammonia']
 target = 'quality_label'
@@ -23,29 +17,50 @@ target = 'quality_label'
 X = df[features].values
 y = df[target].values
 
-scaler_X = MinMaxScaler()
-X = scaler_X.fit_transform(X)
+# Разделение данных
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+# Определение функции оптимизации
+def objective(trial):
+    params = {
+        'iterations': trial.suggest_int('iterations', 500, 3000),
+        'depth': trial.suggest_int('depth', 4, 10),
+        'learning_rate': trial.suggest_float('learning_rate', 0.005, 0.1, log=True),
+        'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 1, 10),
+        'random_strength': trial.suggest_float('random_strength', 1e-9, 10.0, log=True),
+        'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
+        'border_count': trial.suggest_int('border_count', 32, 255),
+        'loss_function': 'MultiClass',
+        'verbose': 0,
+        'task_type': 'CPU'  # Можно поставить 'GPU', если есть видеокарта
+    }
+    
+    model = CatBoostClassifier(**params)
+    model.fit(X_train, y_train)
+    
+    preds = model.predict(X_valid)
+    accuracy = accuracy_score(y_valid, preds)
+    return accuracy
 
-model = CatBoostClassifier(
-    iterations=1000,
-    depth=8,
-    learning_rate=0.01,
-    loss_function='MultiClass',
-    verbose=50,
-    class_weights=[3, 1, 3]  
-)
+# Запуск оптимизации
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=20)
 
-model.fit(X_train, y_train)
+print('✅ Лучшие параметры:', study.best_params)
+print(f'🎯 Лучший результат: {study.best_value:.4f}')
 
-y_pred = model.predict(X_test)
+best_params = study.best_params
+best_params['loss_function'] = 'MultiClass'
+best_params['verbose'] = 50
 
-accuracy = accuracy_score(y_test, y_pred)
-print(f'Accuracy: {accuracy:.4f}')
-print('Classification Report:')
-print(classification_report(y_test, y_pred))
+final_model = CatBoostClassifier(**best_params)
+final_model.fit(X_train, y_train)
 
-model.save_model('models/catboost_water_quality_classifier')
+# Оценка на тестовых данных
+y_pred = final_model.predict(X_valid)
+print('Финальная точность:', accuracy_score(y_valid, y_pred))
+print('📋 Classification Report:')
+print(classification_report(y_valid, y_pred, target_names=['good', 'medium', 'bad']))
 
-print('✅ Классификатор CatBoost обучен и сохранён как catboost_water_quality_classifier')
+final_model.save_model('models/catboost_water_quality_classifier_optimized')
+print('✅ Оптимизированная модель сохранена!')
