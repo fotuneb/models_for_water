@@ -2,7 +2,7 @@ import numpy as np
 from catboost import CatBoostClassifier
 
 model = CatBoostClassifier()
-model.load_model('catboost_water_quality_classifier')
+model.load_model('models/catboost_water_quality_classifier')
 
 print("Введите параметры качества воды через пробел:")
 print("temp_water (°C), temp_air (°C), precipitation (мм), water_level (м), pH, oxygen (мг/л), nitrates (мг/л), ammonia (мг/л)")

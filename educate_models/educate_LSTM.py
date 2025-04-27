@@ -12,7 +12,7 @@ EPOCHS = 30
 LR = 0.001
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-df = pd.read_csv('water_quality_dataset_big.csv')
+df = pd.read_csv('dataset/water_quality_dataset_big.csv')
 
 features = ['temp_water', 'temp_air', 'precipitation', 'water_level', 'pH', 'oxygen', 'nitrates', 'ammonia']
 targets = ['turbidity', 'oxygen', 'water_level'] 
@@ -83,6 +83,6 @@ for epoch in range(EPOCHS):
 
     print(f'Epoch {epoch+1}/{EPOCHS}, Loss: {epoch_loss/len(train_loader):.6f}')
 
-torch.save(model.state_dict(), 'lstm_multitask_water_quality_model.pth')
+torch.save(model.state_dict(), 'models/lstm_multitask_water_quality_model.pth')
 
-print('✅ Модель LSTM многозадачная обучена и сохранена как lstm_multitask_water_quality_model.pth')
+print('✅ Модель LSTM обучена и сохранена как lstm_multitask_water_quality_model.pth')

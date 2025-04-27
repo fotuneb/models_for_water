@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
 
-# Параметры генерации
-n_lakes = 100  # Количество водоёмов
-n_days = 365   # Количество дней на водоём
+n_lakes = 100 
+n_days = 365   
 
 np.random.seed(42)
 
@@ -20,9 +19,8 @@ for lake_id in range(n_lakes):
         oxygen = np.random.normal(loc=8, scale=2)
         nitrates = np.random.normal(loc=2, scale=1)
         ammonia = np.random.normal(loc=0.5, scale=0.2)
-        turbidity = np.random.normal(loc=10, scale=5)  # будет использоваться для классификации качества
-        
-        # Граничные условия, чтобы убрать экзотику
+        turbidity = np.random.normal(loc=10, scale=5)  
+
         temp_water = np.clip(temp_water, 0, 30)
         temp_air = np.clip(temp_air, -10, 40)
         precipitation = np.clip(precipitation, 0, 20)
@@ -43,7 +41,6 @@ columns = ['lake_id', 'date', 'temp_water', 'temp_air', 'precipitation',
 
 df = pd.DataFrame(data, columns=columns)
 
-# Классификация качества воды на основе мутности (turbidity)
 def classify_quality(turbidity):
     if turbidity > 15:
         return 'bad'
@@ -54,10 +51,8 @@ def classify_quality(turbidity):
 
 df['quality_class'] = df['turbidity'].apply(classify_quality)
 
-# Посмотрим на баланс классов
 print(df['quality_class'].value_counts())
 
-# Сохраним в .csv
-df.to_csv('water_quality_dataset_big.csv', index=False)
+df.to_csv('datasets\water_quality_dataset_big.csv', index=False)
 
 print('✅ Датасет сохранён как water_quality_dataset_big.csv')

@@ -45,7 +45,7 @@ def predict():
     single_data = get_user_input()
 
     import pandas as pd
-    df_train = pd.read_csv('water_quality_dataset_big.csv')
+    df_train = pd.read_csv('dataset/water_quality_dataset_big.csv')
     scaler_X = MinMaxScaler()
     scaler_y = MinMaxScaler()
     scaler_X.fit(df_train[features].values)
@@ -57,7 +57,7 @@ def predict():
     sequence = torch.tensor(sequence, dtype=torch.float32).unsqueeze(0).to(DEVICE)
 
     model = LSTMModel(input_size=len(features), hidden_size=64, num_layers=2, output_size=len(targets)).to(DEVICE)
-    model.load_state_dict(torch.load('lstm_multitask_water_quality_model.pth', map_location=DEVICE))
+    model.load_state_dict(torch.load('models/lstm_multitask_water_quality_model.pth', map_location=DEVICE))
     model.eval()
 
     with torch.no_grad():

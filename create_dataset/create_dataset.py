@@ -1,15 +1,12 @@
 import pandas as pd
 import numpy as np
 
-# Параметры
 np.random.seed(42)
 n_days = 365
 n_lakes = 5
 
-# Даты
 dates = pd.date_range(start='2024-01-01', periods=n_days)
 
-# Список данных
 data = []
 
 for lake_id in range(1, n_lakes + 1):
@@ -50,29 +47,27 @@ for lake_id in range(1, n_lakes + 1):
 
         # Сильные осадки
         if precipitation[i] > 10:
-            turbidity[i] += np.random.uniform(5, 10)  # Рост мутности
-            oxygen[i] -= np.random.uniform(1, 2)      # Падение кислорода
+            turbidity[i] += np.random.uniform(5, 10)  
+            oxygen[i] -= np.random.uniform(1, 2)      
             oxygen[i] = max(oxygen[i], 0)
-            nitrates[i] += np.random.uniform(0.5, 1.5)  # Рост нитратов
+            nitrates[i] += np.random.uniform(0.5, 1.5)  
         
         # Летние коррекции
         if month in [6, 7, 8]:
             pH[i] += np.random.uniform(0.1, 0.3)  # Повышение pH за счет фотосинтеза
-            pH[i] = min(pH[i], 8.5)               # Ограничение сверху
+            pH[i] = min(pH[i], 8.5)               
 
         data.append([
             dates[i], lake_id, temp_water[i], temp_air[i], precipitation[i],
             water_level[i], pH[i], turbidity[i], oxygen[i], nitrates[i], ammonia[i]
         ])
 
-# Создание DataFrame
 columns = ['date', 'lake_id', 'temp_water', 'temp_air', 'precipitation',
            'water_level', 'pH', 'turbidity', 'oxygen', 'nitrates', 'ammonia']
 
 df = pd.DataFrame(data, columns=columns)
 
-# Сохраняем в CSV
-df.to_csv('water_quality_dataset.csv', index=False)
+df.to_csv('dataset/water_quality_dataset.csv', index=False)
 
 print("✅ Датасет успешно сохранён как 'water_quality_dataset.csv'")
 print(df.head(10))

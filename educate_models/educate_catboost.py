@@ -5,15 +5,15 @@ from sklearn.preprocessing import MinMaxScaler
 from catboost import CatBoostClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-df = pd.read_csv('water_quality_dataset_big.csv')
+df = pd.read_csv('dataset/water_quality_dataset_big.csv')
 
 def label_quality(turbidity):
     if turbidity < 5:
-        return 0  # Чистая вода
+        return 0
     elif turbidity <= 15:
-        return 1  # Средняя мутность
+        return 1
     else:
-        return 2  # Высокая мутность
+        return 2
 
 df['quality_label'] = df['turbidity'].apply(label_quality)
 
@@ -46,6 +46,6 @@ print(f'Accuracy: {accuracy:.4f}')
 print('Classification Report:')
 print(classification_report(y_test, y_pred))
 
-model.save_model('catboost_water_quality_classifier')
+model.save_model('models/catboost_water_quality_classifier')
 
 print('✅ Классификатор CatBoost обучен и сохранён как catboost_water_quality_classifier')
